@@ -21,15 +21,11 @@ extern "C" void finish_algos();
 
 // Returns descriptor used later in 'data_*' arguments, accepts filename to open
 // Opens only existing files, returning -1 on error
-extern "C" int open_dat_file(const char *file_name);
+extern "C" int open_wav_file(const char *file_name);
 
 // Creates a new file descriptor used later in 'data_out' arguments, accepts filename to create
 // Can't fail as the actual file is not created at this point
 extern "C" int open_new_file(const char *file_name);
-
-// Writes file with a given descriptor to a internal format file on disk
-// Returns -1 on error
-extern "C" int write_file_to_dat(int desc);
 
 // Writes file with a given descriptor to a PCM WAV format file on disk
 // Returns -1 on error
@@ -37,7 +33,7 @@ extern "C" int write_file_to_wav(int desc);
 
 // Returns pointer to sound data using a given descriptor, use with get_sound_data_size!
 // Returns nullptr if descriptor is invalid
-extern "C" float *get_sound_data(int desc);
+extern "C" double *get_sound_data(int desc);
 
 // Returns size of sound data, used with get_sound_data
 // Returns 0 if descriptor is invalid
@@ -47,15 +43,11 @@ extern "C" unsigned long long get_sound_data_size(int desc);
 // Returns 0 if descriptor is invalid
 extern "C" int get_sample_rate(int desc);
 
-// Convolves 'data_in' with 'data_resp' pushing result to 'data_out'
-// Returns -1 on error
-extern "C" long long convolve(int data_in, int data_resp, int data_out);
-
 // Amplifies 'data_in' by 'strength' ranging from 1 to 10
-extern "C" void amplify(int strength, int data_in, int data_out);
+extern "C" void amplify(double strength, int data_in, int data_out);
 
 // Attenuates 'data_in' by 'strength' ranging from 1 to 10
-extern "C" void attenuate(int strength, int data_in, int data_out);
+extern "C" void attenuate(double strength, int data_in, int data_out);
 
 // Applies low-pass filter to 'data_in' pushing result to 'data_out'
 // 'cutoff_freq' is in Hz and must be less than Nyquist frequency
@@ -85,7 +77,7 @@ band_stop(int cutoff_lo, int cutoff_hi, int w_func, int data_in, int data_out);
 
 // Applies simple echo to 'data_in' pushing result to 'data_out'
 // 'delay' is the coefficient applied to sample rate to get delay
-extern "C" void echo(int delay, float coef, int data_in, int data_out);
+extern "C" void echo(int delay, double coef, int data_in, int data_out);
 
 
 #endif //DSP_LIB_DSP_ALGOS_H

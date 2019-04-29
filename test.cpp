@@ -6,13 +6,13 @@ int main(int argc, char *argv[]) {
         printf("Program must be run with test file path as the only argument.\n");
         return 1;
     }
-    typedef int open_dat_file_t(const char *file_name);
+    typedef int open_wav_file_t(const char *file_name);
     typedef int open_new_file_t(const char *file_name);
     typedef int write_file_to_wav_t(int desc);
-    typedef unsigned long long get_sound_data_size_t(int desc);
+    typedef long long get_sound_data_size_t(int desc);
     typedef int get_sample_rate_t(int desc);
-    typedef void amplify_t(int strength, int data_in, int data_out);
-    typedef void attenuate_t(int strength, int data_in, int data_out);
+    typedef void amplify_t(double strength, int data_in, int data_out);
+    typedef void attenuate_t(double strength, int data_in, int data_out);
     typedef long long low_pass_t(int cutoff_freq, int w_func, int data_in, int data_out);
     typedef long long high_pass_t(int cutoff_freq, int w_func, int data_in, int data_out);
     typedef long long band_pass_t(int cutoff_lo, int cutoff_hi, int w_func, int data_in, int data_out);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
         printf("%s\n", dlerror());
         return 1;
     }
-    auto open_dat_file = (open_dat_file_t *) dlsym(handle, "open_dat_file");
+    auto open_wav_file = (open_wav_file_t *) dlsym(handle, "open_wav_file");
     auto open_new_file = (open_new_file_t *) dlsym(handle, "open_new_file");
     auto write_file_to_wav = (write_file_to_wav_t *) dlsym(handle, "write_file_to_wav");
     auto get_sound_data_size = (get_sound_data_size_t *) dlsym(handle, "get_sound_data_size");
@@ -48,13 +48,13 @@ int main(int argc, char *argv[]) {
     const char *echo_f = "echo_test.wav";
 
     printf("Opening test file %s\n", argv[1]);
-    int test_file = open_dat_file(argv[1]);
+    int test_file = open_wav_file(argv[1]);
     if (test_file == -1) {
         printf("Couldn't open %s\n", argv[1]);
         return 1;
     }
     int sample_rate = get_sample_rate(test_file);
-    int lp_freq = sample_rate / 2 / 15;
+    int lp_freq = sample_rate / 2 / 10;
     int hp_freq = sample_rate / 2 / 5 * 4;
     int b_freq_lo = sample_rate / 2 / 15;
     int b_freq_hi = sample_rate / 2 / 5 * 5 - 10;
@@ -66,8 +66,8 @@ int main(int argc, char *argv[]) {
     int new_file_bp = open_new_file(bp);
     int new_file_bs = open_new_file(bs);
     int new_file_echo = open_new_file(echo_f);
-    attenuate(10, test_file, new_file_att);
-    amplify(10, test_file, new_file_amp);
+    attenuate(2, test_file, new_file_att);
+    amplify(3, test_file, new_file_amp);
     long long lp_time = low_pass(lp_freq, 1, test_file, new_file_lp);
     printf("Low pass filter took: %lld\n", lp_time);
     long long hp_time = high_pass(hp_freq, 1, test_file, new_file_hp);
