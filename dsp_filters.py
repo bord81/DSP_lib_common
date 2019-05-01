@@ -1,5 +1,6 @@
 from lib_bind import *
-import os, sys
+import sys
+
 
 def print_usage_and_exit():
     print "Filters script for DSP_lib_common"
@@ -13,6 +14,7 @@ def print_usage_and_exit():
     print "-bs %lower-frequency %upper-frequency %window-filter"
     print "-ec %delay %coef"
     sys.exit(1)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:

@@ -1,5 +1,6 @@
 from lib_bind import *
-import os, sys
+import sys
+
 
 def print_usage_and_exit():
     print "Front-end script for DSP_lib_common"
@@ -8,6 +9,7 @@ def print_usage_and_exit():
     print "-sr"
     print "-sz"
     sys.exit(1)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
