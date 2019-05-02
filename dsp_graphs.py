@@ -94,7 +94,6 @@ def show_dft(desc):
     plt.title(title)
     xlabel = "DFT of %s" % (sys.argv[1])
     plt.xlabel(xlabel)
-
     plt.subplot(2, 1, 2)
     plt.plot(y, mag)
     plt.xlabel('Frequency')
