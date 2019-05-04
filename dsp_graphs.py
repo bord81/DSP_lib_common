@@ -14,6 +14,7 @@ def print_usage_and_exit():
     print "-hist"
     print "-amp"
     print "-dft"
+    print "-fft"
     sys.exit(1)
 
 
@@ -82,6 +83,23 @@ def calc_dft(x):
     return re, im
 
 
+def show_fft(desc):
+    x, size = get_data_array_and_size(desc)
+    fft_arr = np.fft.rfft(x)
+    y = np.linspace(0, get_sample_rate(desc) / 2, len(fft_arr.real))
+    t = np.arange(size)
+    plt.subplot(2, 1, 1)
+    plt.plot(t, x)
+    title = "Original signal in %s" % (sys.argv[1])
+    plt.title(title)
+    xlabel = "FFT of %s" % (sys.argv[1])
+    plt.xlabel(xlabel)
+    plt.subplot(2, 1, 2)
+    plt.plot(y, abs(fft_arr.real))
+    plt.xlabel('Frequency')
+    plt.show()
+
+
 def show_dft(desc):
     x, size = get_data_array_and_size(desc)
     re, im = calc_dft(x)
@@ -122,5 +140,7 @@ if __name__ == "__main__":
         show_ampl(in_file)
     elif sys.argv[2] == "-dft":
         show_dft(in_file)
+    elif sys.argv[2] == "-fft":
+        show_fft(in_file)
     finish_dsp()
     sys.exit(0)
