@@ -13,6 +13,3 @@ dsp_lookup.py - to check file sample rate and samples count
 dsp_filters.py - to apply library filters to a file
 
 dsp_graphs.py - to visualize data
-
-
-Note: some WAVs don't get processed correctly and this is sometimes caused by libsndfile issues and sometimes by Matplotlib. For this project I don't wanna dive too deeply into this and you can download working samples from http://www.moviewavs.com/ or if you have BBB with ADC cape you can get working WAVs using my ADC-001-DSP project.
