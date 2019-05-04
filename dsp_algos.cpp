@@ -94,25 +94,6 @@ namespace dsp_algos {
         return static_cast<int>(records.size() - 1);
     }
 
-    static int makeBFilter(int size) {
-        Data stub;
-        stub.allocated = false;
-        stub.file_path = "__stub";
-        stub.samples = nullptr;
-        memset(&stub.info, 0, sizeof(stub.info));
-        stub.info.channels = 1;
-        stub.info.frames = size;
-        records.push_back(stub);
-        records[records.size() - 1].samples = static_cast<double *>(calloc(size, sizeof(double)));
-        if (records[records.size() - 1].samples != nullptr) {
-            records[records.size() - 1].allocated = true;
-            wBlackman(records[records.size() - 1].samples, size);
-        } else {
-            return -1;
-        }
-        return static_cast<int>(records.size() - 1);
-    }
-
     extern "C" void finish_algos() {
         lock_guard<mutex> lock(data_guard);
         for_each(records.begin(), records.end(), [](Data &data) {
