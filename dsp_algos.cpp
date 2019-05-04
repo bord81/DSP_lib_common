@@ -27,10 +27,9 @@ namespace dsp_algos {
     static mutex data_guard;
 
     static const auto FILTER_SIZE = 100;
+    static const auto BUFFER_LEN = 2048;
 
     static bool isValid(int desc) {
-        printf("DEBUG_ISVAL 1: %d %d %d \n", desc, records.size(), records[desc].allocated);
-        printf("DEBUG_ISVAL 2: %d\n", (desc < records.size()) && records[desc].allocated);
         return (desc < records.size()) && records[desc].allocated;
     }
 
@@ -64,21 +63,14 @@ namespace dsp_algos {
 
     static void copySndInfo(int in, int out) {
         memcpy(&records[out].info, &records[in].info, sizeof(SF_INFO));
-        printf("DEBUG_CPY_MEM: in_no: %d out_no: %d \n", in, out);
-        printf("DEBUG_CPY_MEM: in: %lld out: %lld \n", getDataSize(in), getDataSize(out));
     }
 
     static bool allocMem(int desc, long long size) {
-        printf("DEBUG_MEM: 1 \n");
-        printf("DEBUG_MEM: 1_2: %lld \n", size);
         if (!records[desc].allocated) {
-            printf("DEBUG_MEM: 2 \n");
             records[desc].samples = static_cast<double *>(calloc(size, sizeof(double)));
             records[desc].allocated = true;
-            printf("DEBUG_MEM: 2_3: %d \n", records[desc].samples == nullptr);
             return records[desc].samples != nullptr;
         } else {
-            printf("DEBUG_MEM: 3 \n");
             return false;
         }
     }
@@ -102,6 +94,25 @@ namespace dsp_algos {
         return static_cast<int>(records.size() - 1);
     }
 
+    static int makeBFilter(int size) {
+        Data stub;
+        stub.allocated = false;
+        stub.file_path = "__stub";
+        stub.samples = nullptr;
+        memset(&stub.info, 0, sizeof(stub.info));
+        stub.info.channels = 1;
+        stub.info.frames = size;
+        records.push_back(stub);
+        records[records.size() - 1].samples = static_cast<double *>(calloc(size, sizeof(double)));
+        if (records[records.size() - 1].samples != nullptr) {
+            records[records.size() - 1].allocated = true;
+            wBlackman(records[records.size() - 1].samples, size);
+        } else {
+            return -1;
+        }
+        return static_cast<int>(records.size() - 1);
+    }
+
     extern "C" void finish_algos() {
         lock_guard<mutex> lock(data_guard);
         for_each(records.begin(), records.end(), [](Data &data) {
@@ -116,21 +127,23 @@ namespace dsp_algos {
         lock_guard<mutex> lock(data_guard);
         SNDFILE *data_file = nullptr;
         Data data;
+        double buffer[BUFFER_LEN];
+        long read_count = 0;
+        long offset = 0L;
         long long size = 0LL;
-        bool test = false;
         memset(&data.info, 0, sizeof(data.info));
         data.allocated = false;
         data.file_path = file_name;
         data.samples = nullptr;
         records.push_back(data);
         if ((data_file = sf_open(file_name, SFM_READ, &records[records.size() - 1].info)) != nullptr
-                && (test = allocMem((records.size() - 1), (size = records[records.size() - 1].info.frames * records[records.size() - 1].info.channels)))) {
-            sf_read_double(data_file, records[records.size() - 1].samples, size);
+                && allocMem((records.size() - 1), (size = records[records.size() - 1].info.frames * records[records.size() - 1].info.channels))) {
+            while ((read_count = sf_read_double(data_file, buffer, BUFFER_LEN))) {
+                memcpy(records[records.size() - 1].samples + offset, buffer, static_cast<size_t>(read_count * sizeof (double)));
+                offset += read_count;
+            }
             sf_close(data_file);
         } else {
-            printf("Error debug: data_file: %p, test: %d, size: %zu\n", data_file, test, size);
-            printf("Error debug: frames: %d, channels: %d\n", records[records.size() - 1].info.frames, records[records.size() - 1].info.channels);
-            printf("Error debug: size: %d\n", records[records.size() - 1].info.frames * records[records.size() - 1].info.channels);
             return -1;
         }
         return static_cast<int>(records.size() - 1);
@@ -186,13 +199,9 @@ namespace dsp_algos {
     }
 
     long long convolve(int data_in, int data_resp, int data_out) {
-        printf("DEBUG_CONV: 1 \n");
         if (!isValid(data_in) ||
             !isValid(data_resp) ||
             !allocMem(data_out, getDataSize(data_in) + getDataSize(data_resp) - 1)) {
-            printf("DEBUG_CONV: 2 \n");
-            printf("DEBUG_CONV: 2_2(data_in): %lld \n", getDataSize(data_in));
-            printf("DEBUG_CONV: 2_2(data_resp): %lld \n", getDataSize(data_resp));
             return -1;
         }
         chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
@@ -219,9 +228,7 @@ namespace dsp_algos {
 
     extern "C" void attenuate(double strength, int data_in, int data_out) {
         lock_guard<mutex> lock(data_guard);
-        printf("DEBUG_ATT: 1 \n");
         if (isValid(data_in) && allocMem(data_out, getDataSize(data_in))) {
-            printf("DEBUG_ATT: 2 \n");
             for (int i = 0; i < getDataSize(data_in); ++i) {
                 getSamples(data_out)[i] = getSamples(data_in)[i] / strength;
             }
@@ -235,6 +242,7 @@ namespace dsp_algos {
         if (isValid(data_in) &&
             isNyqFreq(data_in, cutoff_freq) &&
             isWFuncValid(w_func)) {
+
             int data_filter = makeWFilter([w_func, cf](double *fd) {
                 wsfirLP(fd, FILTER_SIZE, w_func, cf);
             });

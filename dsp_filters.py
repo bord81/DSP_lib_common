@@ -4,7 +4,7 @@ import sys
 
 def print_usage_and_exit():
     print "Filters script for DSP_lib_common"
-    print "Use as 'python dsp_lookup.py FILE_IN FILE_OUT ARG KEYS'"
+    print "Use as 'python dsp_filters.py FILE_IN FILE_OUT ARG KEYS'"
     print "ARGS/KEYS:"
     print "-amp %strength"
     print "-att %strength"
@@ -13,6 +13,7 @@ def print_usage_and_exit():
     print "-bp %lower-frequency %upper-frequency %window-filter"
     print "-bs %lower-frequency %upper-frequency %window-filter"
     print "-ec %delay %coef"
+    print "-blk %filter-size"
     sys.exit(1)
 
 
@@ -26,6 +27,8 @@ if __name__ == "__main__":
             amplify(float(sys.argv[4]), in_file, out_file)
         elif sys.argv[3] == "-att":
             attenuate(float(sys.argv[4]), in_file, out_file)
+        elif sys.argv[3] == "-blk":
+            print blackman(int(sys.argv[4]), in_file, out_file)
     elif len(sys.argv) == 6:
         print "Filter action took:"
         if sys.argv[3] == "-lp":
