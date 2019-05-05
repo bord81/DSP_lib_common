@@ -13,7 +13,7 @@ def print_usage_and_exit():
     print "-bp %lower-frequency %upper-frequency %window-filter"
     print "-bs %lower-frequency %upper-frequency %window-filter"
     print "-ec %delay %coef"
-    print "-blk %filter-size"
+    print "-gau %coef"
     sys.exit(1)
 
 
@@ -22,13 +22,15 @@ if __name__ == "__main__":
         print_usage_and_exit()
     in_file = open_wav_file(sys.argv[1])
     out_file = open_new_file(sys.argv[2])
+    print in_file
+    print out_file
     if len(sys.argv) == 5:
         if sys.argv[3] == "-amp":
             amplify(float(sys.argv[4]), in_file, out_file)
         elif sys.argv[3] == "-att":
             attenuate(float(sys.argv[4]), in_file, out_file)
-        elif sys.argv[3] == "-blk":
-            print blackman(int(sys.argv[4]), in_file, out_file)
+        elif sys.argv[3] == "-gau":
+            gaussian(float(sys.argv[4]), in_file, out_file)
     elif len(sys.argv) == 6:
         print "Filter action took:"
         if sys.argv[3] == "-lp":
@@ -43,7 +45,7 @@ if __name__ == "__main__":
             print band_pass(int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), in_file, out_file)
         elif sys.argv[3] == "-bs":
             print band_stop(int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), in_file, out_file)
-    write_file_to_wav(out_file)
+    print write_file_to_wav(out_file)
     finish_dsp()
     print "Done!"
     sys.exit(0)

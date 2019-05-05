@@ -1,7 +1,7 @@
 from ctypes import *
 
-cdll.LoadLibrary("libdsp_lib.so")
-_dsp_lib = CDLL("libdsp_lib.so")
+cdll.LoadLibrary("/home/bobr/PycharmProjects/dsp_lib/libdsp_lib.so")
+_dsp_lib = CDLL("/home/bobr/PycharmProjects/dsp_lib/libdsp_lib.so")
 
 
 def open_wav_file(file_name):
@@ -54,6 +54,10 @@ def band_stop(cutoff_lo, cutoff_hi, w_func, data_in, data_out):
 
 def echo(delay, coef, data_in, data_out):
     return _dsp_lib.echo(delay, c_double(coef), data_in, data_out)
+
+
+def gaussian(coef, data_in, data_out):
+    return _dsp_lib.gaussian(c_double(coef), data_in, data_out)
 
 
 def finish_dsp():

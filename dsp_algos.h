@@ -79,5 +79,8 @@ band_stop(int cutoff_lo, int cutoff_hi, int w_func, int data_in, int data_out);
 // 'delay' is the coefficient applied to sample rate to get delay
 extern "C" void echo(int delay, double coef, int data_in, int data_out);
 
+// Applies moving average filter to 'data_in' pushing result to 'data_out'
+// 'size' must be odd number
+extern "C" void gaussian(double coef, int data_in, int data_out);
 
 #endif //DSP_LIB_DSP_ALGOS_H

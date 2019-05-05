@@ -75,6 +75,31 @@ namespace dsp_algos {
         }
     }
 
+    static double getGaussian() {
+        static int ready = 0;
+        static double gstore;
+        double rconst1 = static_cast<double>(2.0 / RAND_MAX);
+        double rconst2 = static_cast<double>(RAND_MAX / 2.0);
+        double v1, v2, r, fac, gaus = 0.0;
+        if (ready == 0) {
+            do {
+                v1 = rand() - rconst2;
+                v2 = rand() - rconst2;
+                v1 *= rconst1;
+                v2 *= rconst1;
+                r = v1 * v1 + v2 * v2;
+            } while (r > 1.0);
+            fac = sqrt(-2.0 * log(r) / r);
+            gstore = v1 * fac;
+            gaus = v2 * fac;
+            ready = 1;
+        } else {
+            ready = 0;
+            gaus = gstore;
+        }
+        return gaus;
+    }
+
     static int makeWFilter(const function<void(double *)> &f) {
         Data stub;
         stub.allocated = false;
@@ -111,14 +136,13 @@ namespace dsp_algos {
         double buffer[BUFFER_LEN];
         long read_count = 0;
         long offset = 0L;
-        long long size = 0LL;
         memset(&data.info, 0, sizeof(data.info));
         data.allocated = false;
         data.file_path = file_name;
         data.samples = nullptr;
         records.push_back(data);
         if ((data_file = sf_open(file_name, SFM_READ, &records[records.size() - 1].info)) != nullptr
-                && allocMem((records.size() - 1), (size = records[records.size() - 1].info.frames * records[records.size() - 1].info.channels))) {
+                && allocMem((records.size() - 1), records[records.size() - 1].info.frames * records[records.size() - 1].info.channels)) {
             while ((read_count = sf_read_double(data_file, buffer, BUFFER_LEN))) {
                 memcpy(records[records.size() - 1].samples + offset, buffer, static_cast<size_t>(read_count * sizeof (double)));
                 offset += read_count;
@@ -297,6 +321,16 @@ namespace dsp_algos {
             }
             copySndInfo(data_in, data_out);
             getSndInfo(data_out).frames += delay;
+        }
+    }
+
+    extern "C" void gaussian(double coef, int data_in, int data_out) {
+        lock_guard<mutex> lock(data_guard);
+        if (isValid(data_in) && allocMem(data_out, getDataSize(data_in))) {
+            for (int i = 0; i < getDataSize(data_in); ++i) {
+                getSamples(data_out)[i] = getSamples(data_in)[i] + coef * getGaussian();
+            }
+            copySndInfo(data_in, data_out);
         }
     }
 }
