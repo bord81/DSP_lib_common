@@ -8,20 +8,19 @@ PI = 3.14159265
 
 
 def print_usage_and_exit():
-    print "Front-end script for DSP_lib_common"
-    print "Use as 'python dsp_graphs.py FILE ARG'"
-    print "ARGS:"
-    print "-hist"
-    print "-amp"
-    print "-dft"
-    print "-fft"
+    print ("Front-end script for DSP_lib_common")
+    print ("Use as 'python dsp_graphs.py FILE ARG'")
+    print ("ARGS:")
+    print ("-hist")
+    print ("-amp")
+    print ("-dft")
+    print ("-fft")
     sys.exit(1)
 
 
 def get_data_array_and_size(desc):
     size = get_sound_data_size(desc)
     data = get_sound_data(desc)
-    data = cast(data, POINTER(c_double))
     arr = []
     for i in range(size):
         arr.append(data[i])
@@ -86,7 +85,13 @@ def calc_dft(x):
 def show_fft(desc):
     x, size = get_data_array_and_size(desc)
     fft_arr = np.fft.rfft(x)
-    y = np.linspace(0, get_sample_rate(desc) / 2, len(fft_arr.real))
+    fft_res = []
+    for i in range(len(fft_arr.real)):
+        if fft_arr.real[i] < 0:
+            continue
+        else:
+            fft_res.append(fft_arr.real[i])
+    y = np.linspace(0, get_sample_rate(desc) / 2, len(fft_res))
     t = np.arange(size)
     plt.subplot(2, 1, 1)
     plt.plot(t, x)
@@ -95,7 +100,7 @@ def show_fft(desc):
     xlabel = "FFT of %s" % (sys.argv[1])
     plt.xlabel(xlabel)
     plt.subplot(2, 1, 2)
-    plt.plot(y, abs(fft_arr.real))
+    plt.plot(y, fft_res)
     plt.xlabel('Frequency')
     plt.show()
 
