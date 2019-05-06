@@ -85,12 +85,13 @@ def calc_dft(x):
 def show_fft(desc):
     x, size = get_data_array_and_size(desc)
     fft_arr = np.fft.rfft(x)
+    mag, phase = rect_to_pol(fft_arr.real, fft_arr.imag)
     fft_res = []
-    for i in range(len(fft_arr.real)):
-        if fft_arr.real[i] < 0:
+    for i in range(len(mag)):
+        if mag[i] < 0:
             continue
         else:
-            fft_res.append(fft_arr.real[i])
+            fft_res.append(mag[i])
     y = np.linspace(0, get_sample_rate(desc) / 2, len(fft_res))
     t = np.arange(size)
     plt.subplot(2, 1, 1)
