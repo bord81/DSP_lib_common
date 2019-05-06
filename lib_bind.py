@@ -1,63 +1,76 @@
 from ctypes import *
 
-cdll.LoadLibrary("/home/bobr/PycharmProjects/dsp_lib/libdsp_lib.so")
-_dsp_lib = CDLL("/home/bobr/PycharmProjects/dsp_lib/libdsp_lib.so")
+cdll.LoadLibrary("libdsp_lib.so")
+_dsp_lib = CDLL("libdsp_lib.so")
 
 
-def open_wav_file(file_name):
-    return _dsp_lib.open_wav_file(c_char_p(file_name))
+open_wav_file = _dsp_lib.open_wav_file
+open_wav_file.argtypes = (c_char_p,)
+open_wav_file.restype = c_int
 
 
-def open_new_file(file_name):
-    return _dsp_lib.open_new_file(c_char_p(file_name))
+open_new_file = _dsp_lib.open_new_file
+open_new_file.argtypes = (c_char_p,)
+open_new_file.restype = c_int
 
 
-def write_file_to_wav(desc):
-    return _dsp_lib.write_file_to_wav(desc)
+write_file_to_wav = _dsp_lib.write_file_to_wav
+write_file_to_wav.argtypes = (c_int,)
+write_file_to_wav.restype = c_int
+
+get_sound_data = _dsp_lib.get_sound_data
+get_sound_data.argtypes = (c_int,)
+get_sound_data.restype = POINTER(c_double)
 
 
-def get_sound_data(desc):
-    return _dsp_lib.get_sound_data(desc)
+get_sound_data_size = _dsp_lib.get_sound_data_size
+get_sound_data_size.argtypes = (c_int,)
+get_sound_data_size.restype = c_longlong
 
 
-def get_sound_data_size(desc):
-    return _dsp_lib.get_sound_data_size(desc)
+get_sample_rate = _dsp_lib.get_sample_rate
+get_sample_rate.argtypes = (c_int,)
+get_sample_rate.restype = c_int
 
 
-def get_sample_rate(desc):
-    return _dsp_lib.get_sample_rate(desc)
+amplify = _dsp_lib.amplify
+amplify.argtypes = (c_double, c_int, c_int,)
+amplify.restype = c_void_p
 
 
-def amplify(strength, data_in, data_out):
-    _dsp_lib.amplify(c_double(strength), data_in, data_out)
+attenuate = _dsp_lib.attenuate
+attenuate.argtypes = (c_double, c_int, c_int,)
+attenuate.restype = c_void_p
 
 
-def attenuate(strength, data_in, data_out):
-    _dsp_lib.attenuate(c_double(strength), data_in, data_out)
+low_pass = _dsp_lib.low_pass
+low_pass.argtypes = (c_int, c_int, c_int, c_int,)
+low_pass.restype = c_longlong
 
 
-def low_pass(cutoff_freq, w_func, data_in, data_out):
-    return _dsp_lib.low_pass(cutoff_freq, w_func, data_in, data_out)
+high_pass = _dsp_lib.high_pass
+high_pass.argtypes = (c_int, c_int, c_int, c_int,)
+high_pass.restype = c_longlong
 
 
-def high_pass(cutoff_freq, w_func, data_in, data_out):
-    return _dsp_lib.high_pass(cutoff_freq, w_func, data_in, data_out)
+band_pass = _dsp_lib.band_pass
+band_pass.argtypes = (c_int, c_int, c_int, c_int, c_int,)
+band_pass.restype = c_longlong
 
 
-def band_pass(cutoff_lo, cutoff_hi, w_func, data_in, data_out):
-    return _dsp_lib.band_pass(cutoff_lo, cutoff_hi, w_func, data_in, data_out)
+band_stop = _dsp_lib.band_stop
+band_stop.argtypes = (c_int, c_int, c_int, c_int, c_int,)
+band_stop.restype = c_longlong
 
 
-def band_stop(cutoff_lo, cutoff_hi, w_func, data_in, data_out):
-    return _dsp_lib.band_stop(cutoff_lo, cutoff_hi, w_func, data_in, data_out)
+echo = _dsp_lib.echo
+echo.argtypes = (c_int, c_double, c_int, c_int,)
+echo.restype = c_void_p
 
 
-def echo(delay, coef, data_in, data_out):
-    return _dsp_lib.echo(delay, c_double(coef), data_in, data_out)
-
-
-def gaussian(coef, data_in, data_out):
-    return _dsp_lib.gaussian(c_double(coef), data_in, data_out)
+gaussian = _dsp_lib.gaussian
+gaussian.argtypes = (c_double, c_int, c_int,)
+gaussian.restype = c_void_p
 
 
 def finish_dsp():

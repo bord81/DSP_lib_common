@@ -22,8 +22,6 @@ if __name__ == "__main__":
         print_usage_and_exit()
     in_file = open_wav_file(sys.argv[1])
     out_file = open_new_file(sys.argv[2])
-    print in_file
-    print out_file
     if len(sys.argv) == 5:
         if sys.argv[3] == "-amp":
             amplify(float(sys.argv[4]), in_file, out_file)
